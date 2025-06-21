@@ -8,6 +8,10 @@ USE CATALOG hive_metastore
 
 -- COMMAND ----------
 
+DROP TABLE employees
+
+-- COMMAND ----------
+
 CREATE TABLE employees
   (id INT, name STRING, salary DOUBLE);
 
@@ -26,9 +30,6 @@ CREATE TABLE employees
 
 -- COMMAND ----------
 
--- NOTE: With latest Databricks Runtimes, inserting few records in single transaction is optimized into single data file.
--- For this demo, we will insert the records in multiple transactions in order to create 4 data files.
-
 INSERT INTO employees
 VALUES 
   (1, "Adam", 3500.0),
@@ -46,8 +47,6 @@ VALUES
 INSERT INTO employees
 VALUES
   (6, "Kim", 6200.3)
-
--- NOTE: When executing multiple SQL statements in the same cell, only the last statement's result will be displayed in the cell output.
 
 -- COMMAND ----------
 
@@ -78,9 +77,15 @@ DESCRIBE DETAIL employees
 
 -- COMMAND ----------
 
-UPDATE employees 
-SET salary = salary + 100
-WHERE name LIKE "A%"
+UPDATE employees
+SET salary = salary + 1000
+WHERE name LIKE 'A%'
+
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ## Exploring Table History
 
 -- COMMAND ----------
 
@@ -96,15 +101,6 @@ DESCRIBE DETAIL employees
 
 -- COMMAND ----------
 
-SELECT * FROM employees
-
--- COMMAND ----------
-
--- MAGIC %md
--- MAGIC ## Exploring Table History
-
--- COMMAND ----------
-
 DESCRIBE HISTORY employees
 
 -- COMMAND ----------
@@ -113,7 +109,8 @@ DESCRIBE HISTORY employees
 
 -- COMMAND ----------
 
--- MAGIC %fs head 'dbfs:/user/hive/warehouse/employees/_delta_log/00000000000000000005.json'
+-- MAGIC %python
+-- MAGIC dbutils.fs.head("dbfs:/user/hive/warehouse/employees/_delta_log/00000000000000000005.json")
 
 -- COMMAND ----------
 

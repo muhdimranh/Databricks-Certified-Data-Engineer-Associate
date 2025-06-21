@@ -13,20 +13,29 @@ DESCRIBE HISTORY employees
 
 -- COMMAND ----------
 
-SELECT * 
-FROM employees VERSION AS OF 4
+SELECT
+  *
+FROM
+  employees
+VERSION AS OF 4
 
 -- COMMAND ----------
 
-SELECT * FROM employees@v4
+SELECT
+  *
+FROM
+  employees@v5
 
 -- COMMAND ----------
 
-DELETE FROM employees
+TRUNCATE TABLE employees
 
 -- COMMAND ----------
 
-SELECT * FROM employees
+SELECT
+  *
+FROM
+  employees
 
 -- COMMAND ----------
 
@@ -34,11 +43,11 @@ RESTORE TABLE employees TO VERSION AS OF 5
 
 -- COMMAND ----------
 
-SELECT * FROM employees
+DESCRIBE HISTORY employees
 
 -- COMMAND ----------
 
-DESCRIBE HISTORY employees
+SELECT * FROM employees
 
 -- COMMAND ----------
 
@@ -57,15 +66,17 @@ ZORDER BY id
 
 -- COMMAND ----------
 
+-- MAGIC %python
+-- MAGIC display(dbutils.fs.ls('dbfs:/user/hive/warehouse/employees/'))
+
+-- COMMAND ----------
+
+-- MAGIC %python
+-- MAGIC display(dbutils.fs.head('dbfs:/user/hive/warehouse/employees/_delta_log/00000000000000000012.json'))
+
+-- COMMAND ----------
+
 DESCRIBE DETAIL employees
-
--- COMMAND ----------
-
-DESCRIBE HISTORY employees
-
--- COMMAND ----------
-
--- MAGIC %fs ls 'dbfs:/user/hive/warehouse/employees'
 
 -- COMMAND ----------
 
@@ -79,7 +90,8 @@ VACUUM employees
 
 -- COMMAND ----------
 
--- MAGIC %fs ls 'dbfs:/user/hive/warehouse/employees'
+-- MAGIC %python
+-- MAGIC display(dbutils.fs.ls('dbfs:/user/hive/warehouse/employees'))
 
 -- COMMAND ----------
 
@@ -87,19 +99,12 @@ VACUUM employees RETAIN 0 HOURS
 
 -- COMMAND ----------
 
-SET spark.databricks.delta.retentionDurationCheck.enabled = false;
+SET spark.databricks.delta.retentionDurationCheck.enabled=false
 
 -- COMMAND ----------
 
-VACUUM employees RETAIN 0 HOURS
-
--- COMMAND ----------
-
--- MAGIC %fs ls 'dbfs:/user/hive/warehouse/employees'
-
--- COMMAND ----------
-
-SELECT * FROM employees@v1
+-- MAGIC %python
+-- MAGIC display(dbutils.fs.ls('dbfs:/user/hive/warehouse/employees'))
 
 -- COMMAND ----------
 
@@ -117,4 +122,9 @@ SELECT * FROM employees
 
 -- COMMAND ----------
 
--- MAGIC %fs ls 'dbfs:/user/hive/warehouse/employees'
+-- MAGIC %python
+-- MAGIC display(dbutils.fs.ls('dbfs:/user/hive/warehouse/employees'))
+
+-- COMMAND ----------
+
+
