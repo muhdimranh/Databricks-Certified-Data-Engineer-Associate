@@ -127,4 +127,75 @@ SELECT * FROM employees
 
 -- COMMAND ----------
 
+USE CATALOG hive_metastore
+
+-- COMMAND ----------
+
+DESCRIBE DETAIL demo.employees
+
+-- COMMAND ----------
+
+-- MAGIC %python
+-- MAGIC display(dbutils.fs.ls('abfss://unity-catalog-storage@dbstoragegaxfo5jgyngc2.dfs.core.windows.net/3697186193429978/__unitystorage/schemas/c600fa8d-d29d-4e98-b89a-3cdf687f952a/tables/dbfabb23-21fb-4079-9821-4fcf8e87039c'))
+
+-- COMMAND ----------
+
+CREATE TABLE test
+(id INT, name STRING)
+LOCATION 'dbfs:/new-location/'
+
+-- COMMAND ----------
+
+CREATE TABLE test_2
+(id INT, name STRING)
+
+-- COMMAND ----------
+
+-- MAGIC %python
+-- MAGIC display(dbutils.fs.ls('/new-location'))
+
+-- COMMAND ----------
+
+DESCRIBE HISTORY test
+
+-- COMMAND ----------
+
+INSERT INTO test VALUES
+(1, "Imran"),
+(2, "Ronaldo")
+
+-- COMMAND ----------
+
+INSERT INTO test_2 VALUES
+(1, "Imran"),
+(2, "Ronaldo")
+
+-- COMMAND ----------
+
+DESCRIBE DETAIL test_2
+
+-- COMMAND ----------
+
+-- MAGIC %python
+-- MAGIC display(dbutils.fs.ls('/new-location'))
+
+-- COMMAND ----------
+
+-- MAGIC %python
+-- MAGIC display(dbutils.fs.ls('/user/hive/warehouse/test_2'))
+
+-- COMMAND ----------
+
+DROP TABLE test
+
+-- COMMAND ----------
+
+SELECT * FROM test
+
+-- COMMAND ----------
+
+DESCRIBE EXTENDED test
+
+-- COMMAND ----------
+
 
