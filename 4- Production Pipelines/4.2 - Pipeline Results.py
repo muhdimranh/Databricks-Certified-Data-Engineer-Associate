@@ -1,4 +1,8 @@
 # Databricks notebook source
+DESCRIBE my-own.default.
+
+# COMMAND ----------
+
 files = dbutils.fs.ls("dbfs:/mnt/demo/dlt/demo_bookstore")
 display(files)
 

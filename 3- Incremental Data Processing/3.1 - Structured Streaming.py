@@ -11,6 +11,34 @@
 
 # COMMAND ----------
 
+display(dbutils.fs.ls("/mnt/demo-datasets/bookstore/books-csv"))
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC CREATE OR REPLACE TEMP VIEW books_view
+# MAGIC USING CSV
+# MAGIC OPTIONS (
+# MAGIC   header = True
+# MAGIC   ,delimiter = ";"
+# MAGIC   ,path = "${dataset.bookstore}/books-csv/export*.csv"
+# MAGIC );
+# MAGIC
+# MAGIC SELECT * FROM books_view
+
+# COMMAND ----------
+
+# MAGIC %sql 
+# MAGIC CREATE OR REPLACE TABLE books AS
+# MAGIC SELECT * FROM books_view
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC DESCRIBE EXTENDED books
+
+# COMMAND ----------
+
 # MAGIC %md
 # MAGIC
 # MAGIC ## Reading Stream
@@ -19,7 +47,7 @@
 
 (spark.readStream
       .table("books")
-      .createOrReplaceTempView("books_streaming_tmp_vw")
+      .createOrReplaceTempView("books_streaming_tmp_view")
 )
 
 # COMMAND ----------
@@ -31,7 +59,7 @@
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC SELECT * FROM books_streaming_tmp_vw
+# MAGIC SELECT * FROM books_streaming_tmp_view
 
 # COMMAND ----------
 
@@ -41,9 +69,11 @@
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC SELECT author, count(book_id) AS total_books
-# MAGIC FROM books_streaming_tmp_vw
-# MAGIC GROUP BY author
+# MAGIC SELECT
+# MAGIC   author
+# MAGIC   ,COUNT(book_id) AS total_books
+# MAGIC FROM books_streaming_tmp_view
+# MAGIC GROUP BY ALL
 
 # COMMAND ----------
 
@@ -67,17 +97,25 @@
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC CREATE OR REPLACE TEMP VIEW author_counts_tmp_vw AS (
-# MAGIC   SELECT author, count(book_id) AS total_books
-# MAGIC   FROM books_streaming_tmp_vw
-# MAGIC   GROUP BY author
+# MAGIC CREATE OR REPLACE TEMP VIEW author_counts_tmp_vw AS
+# MAGIC (
+# MAGIC   SELECT
+# MAGIC   author
+# MAGIC   ,COUNT(book_id) AS total_books
+# MAGIC FROM books_streaming_tmp_view
+# MAGIC GROUP BY ALL
 # MAGIC )
 
 # COMMAND ----------
 
-(spark.table("author_counts_tmp_vw")                               
-      .writeStream  
-      .trigger(processingTime='4 seconds')
+# MAGIC %sql
+# MAGIC SELECT * FROM author_counts_tmp_vw
+
+# COMMAND ----------
+
+(spark.table("author_counts_tmp_vw")
+      .writeStream
+      .trigger(processingTime = '4 seconds')
       .outputMode("complete")
       .option("checkpointLocation", "dbfs:/mnt/demo/author_counts_checkpoint")
       .table("author_counts")
@@ -86,8 +124,7 @@
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC SELECT *
-# MAGIC FROM author_counts
+# MAGIC SELECT * FROM author_counts
 
 # COMMAND ----------
 
@@ -131,3 +168,7 @@
 # MAGIC %sql
 # MAGIC SELECT *
 # MAGIC FROM author_counts
+
+# COMMAND ----------
+
+

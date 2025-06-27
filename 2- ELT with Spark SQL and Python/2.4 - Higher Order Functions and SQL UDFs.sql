@@ -24,17 +24,23 @@ SELECT * FROM orders
 SELECT
   order_id,
   books,
-  FILTER (books, i -> i.quantity >= 2) AS multiple_copies
+  FILTER(books, i -> i.quantity >= 2) AS multiple_copies
 FROM orders
 
 -- COMMAND ----------
 
-SELECT order_id, multiple_copies
-FROM (
+WITH cte AS (
   SELECT
     order_id,
-    FILTER (books, i -> i.quantity >= 2) AS multiple_copies
-  FROM orders)
+    books,
+    FILTER(books, i -> i.quantity >= 2) AS multiple_copies
+  FROM orders
+)
+
+SELECT
+  order_id
+  ,multiple_copies
+FROM cte
 WHERE size(multiple_copies) > 0;
 
 -- COMMAND ----------
@@ -45,14 +51,43 @@ WHERE size(multiple_copies) > 0;
 
 -- COMMAND ----------
 
+WITH cte AS (
 SELECT
-  order_id,
-  books,
-  TRANSFORM (
-    books,
-    b -> CAST(b.subtotal * 0.8 AS INT)
+  order_id
+  ,books
+  ,TRANSFORM(
+    books
+    ,b -> CAST(b.subtotal * 0.8 AS INT) 
+  ) subtotal_after_discount
+FROM orders
+)
+
+SELECT
+  *
+  ,explode(subtotal_after_discount)
+FROM cte
+
+-- COMMAND ----------
+
+WITH cte AS (
+  SELECT
+    *
+    ,TRANSFORM (
+      books
+      ,b -> CAST(b.subtotal AS INT)
+    ) AS casted
+  FROM orders
+)
+
+SELECT
+  customer_id
+  ,books
+  ,TRANSFORM (
+    casted
+    ,c -> c * 0.8
   ) AS subtotal_after_discount
-FROM orders;
+FROM cte
+
 
 -- COMMAND ----------
 
@@ -61,14 +96,16 @@ FROM orders;
 
 -- COMMAND ----------
 
-CREATE OR REPLACE FUNCTION get_url(email STRING)
+CREATE OR REPLACE FUNCTION get_url (email STRING)
 RETURNS STRING
 
 RETURN concat("https://www.", split(email, "@")[1])
 
 -- COMMAND ----------
 
-SELECT email, get_url(email) domain
+SELECT
+  email
+  ,get_url(email) AS domain
 FROM customers
 
 -- COMMAND ----------
@@ -81,21 +118,30 @@ DESCRIBE FUNCTION EXTENDED get_url
 
 -- COMMAND ----------
 
-CREATE FUNCTION site_type(email STRING)
+CREATE OR REPLACE FUNCTION site_type(email STRING)
 RETURNS STRING
-RETURN CASE 
-          WHEN email like "%.com" THEN "Commercial business"
-          WHEN email like "%.org" THEN "Non-profits organization"
-          WHEN email like "%.edu" THEN "Educational institution"
-          ELSE concat("Unknow extenstion for domain: ", split(email, "@")[1])
-       END;
+
+RETURN
+  CASE
+    WHEN get_url(email) LIKE "%.com" THEN "Commercial Business"
+    WHEN get_url(email) LIKE "%.org" THEN "Non-profit Organization"
+    WHEN get_url(email) LIKE "%.edu" THEN "Educational Institution"
+    ELSE concat("Unknown extention for domain: ", split(email, "@")[1])
+  END;
+  
 
 -- COMMAND ----------
 
-SELECT email, site_type(email) as domain_category
+SELECT
+  email
+  ,site_type(email) AS site_type
 FROM customers
 
 -- COMMAND ----------
 
 DROP FUNCTION get_url;
-DROP FUNCTION site_type;
+DROP FUNCTION site_type
+
+-- COMMAND ----------
+
+

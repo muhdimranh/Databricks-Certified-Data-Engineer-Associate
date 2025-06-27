@@ -40,6 +40,20 @@ AS SELECT * FROM cloud_files("${datasets.path}/orders-json-raw", "json",
 
 -- COMMAND ----------
 
+-- %python
+-- import dlt
+
+-- @dlt.table(
+--   name = "customers"
+--   ,comment = "The customers lookup table, ingested from customers-json"
+-- )
+-- def customers():
+--   df = spark.read.json(f"{datasets.path}/customers-json")
+--   return df
+
+
+-- COMMAND ----------
+
 CREATE OR REFRESH LIVE TABLE customers
 COMMENT "The customers lookup table, ingested from customers-json"
 AS SELECT * FROM json.`${datasets.path}/customers-json`

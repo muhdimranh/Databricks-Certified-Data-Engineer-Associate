@@ -31,7 +31,7 @@ display(files)
 (spark.readStream
         .format("cloudFiles")
         .option("cloudFiles.format", "parquet")
-        .option("cloudFiles.schemaLocation", "dbfs:/mnt/demo/orders_checkpoint")
+        .option("cloudFiles.SchemaLocation", "dbfs:/mnt/demo/orders_checkpoint")
         .load(f"{dataset_bookstore}/orders-raw")
       .writeStream
         .option("checkpointLocation", "dbfs:/mnt/demo/orders_checkpoint")
@@ -93,3 +93,7 @@ display(files)
 # COMMAND ----------
 
 dbutils.fs.rm("dbfs:/mnt/demo/orders_checkpoint", True)
+
+# COMMAND ----------
+
+

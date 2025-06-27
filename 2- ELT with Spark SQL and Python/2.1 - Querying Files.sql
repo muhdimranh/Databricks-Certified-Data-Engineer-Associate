@@ -51,15 +51,16 @@ SELECT *, input_file_name() AS source_file FROM binaryFile.`${dataset.bookstore}
 
 -- COMMAND ----------
 
+DROP TABLE IF EXISTS books_csv;
 CREATE TABLE IF NOT EXISTS books_csv
   (book_id STRING, title STRING, author STRING, category STRING, price DOUBLE)
 USING CSV
 OPTIONS (
   header= "true",
   delimiter = ";",
-  encoding = "utf-8-bin"
+  path = "${dataset.bookstore}/books-csv/export*.csv"
 )
-LOCATION '${dataset.bookstore}/books-csv'
+-- LOCATION '${dataset.bookstore}/books-csv/export*.csv'
 
 -- COMMAND ----------
 
@@ -68,6 +69,11 @@ SELECT * FROM books_csv
 -- COMMAND ----------
 
 DESCRIBE EXTENDED books_csv
+
+-- COMMAND ----------
+
+-- MAGIC %python
+-- MAGIC display(dbutils.fs.ls("dbfs:/mnt/demo-datasets/bookstore/books-csv/"))
 
 -- COMMAND ----------
 
